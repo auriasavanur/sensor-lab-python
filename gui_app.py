@@ -21,6 +21,16 @@ experiment = st.selectbox("Choose an experiment to run:", [
 ip_address = st.text_input("Enter Moku:Go IP Address", "192.168.1.100")
 start_button = st.button("▶ Start Experiment")
 
+# QR Preview Section
+if experiment == "RTD / Thermistor Calibration":
+    st.image("images/qr_codes/rtd_qr.png", caption="Scan to view RTD script", width=200)
+elif experiment == "Strain Gauge Output":
+    st.image("images/qr_codes/strain_qr.png", caption="Scan to view Strain Gauge script", width=200)
+elif experiment == "LVDT Displacement":
+    st.image("images/qr_codes/lvdt_qr.png", caption="Scan to view LVDT script", width=200)
+elif experiment == "Pulse Sensor Visualization":
+    st.image("images/qr_codes/pulse_qr.png", caption="Scan to view Pulse Sensor script", width=200)
+
 # Button logic
 if start_button:
     if "Coming Soon" in experiment:
