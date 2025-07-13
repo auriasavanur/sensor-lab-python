@@ -5,9 +5,21 @@ This repository contains Python scripts for simulating and visualizing sensor da
 ## 📘 Experiments Included
 
 - **RTD / Thermistor Calibration** – `rtd_live.py`
+### 🔹 RTD / Thermistor Calibration  
+[View Script](https://github.com/auriasavanur/sensor-lab-python/blob/main/run_rtd.py)  
+![RTD QR Code](images/qr_codes/rtd_qr.png)
 - **Strain Gauge Bridge Output** – `strain_live.py`
+### 🔹 Strain Gauge Bridge Output  
+[View Script](https://github.com/auriasavanur/sensor-lab-python/blob/main/run_strain.py)  
+![Strain QR Code](images/qr_codes/strain_qr.png)
 - **LVDT Displacement Simulation** – `lvdt_plot.py`
+### 🔹 LVDT Displacement Simulation  
+[View Script](https://github.com/auriasavanur/sensor-lab-python/blob/main/run_lvdt.py)  
+![LVDT QR Code](images/qr_codes/lvdt_qr.png)
 - **Pulse Sensor Visualization** – `pulse_sensor_live.py`
+### 🔹 Pulse Sensor Visualization  
+[View Script](https://github.com/auriasavanur/sensor-lab-python/blob/main/run_pulse.py)  
+![Pulse QR Code](images/qr_codes/pulse_qr.png)
 
 ## 🚀 Getting Started
 
