@@ -1,6 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
+# 👇 Point Moku API to your instrument files
+os.environ["MOKU_DATA_PATH"] = r"C:\Users\venv\Lib\site-packages\moku\data"
+
+# 👇 Try importing Oscilloscope instrument
 try:
     from moku.instruments import Oscilloscope
 except ImportError:
@@ -18,16 +23,34 @@ def main(ip, is_streamlit=False):
         if ip.lower() == "demo" or ip.strip() == "":
             time_axis, displacement = get_mock_data()
             mode = "Demo Mode"
+
         elif Oscilloscope:
-            scope = Oscilloscope(ip)
+            scope = Oscilloscope(
+                ip,
+                force_connect=True,
+                ignore_busy=True,
+                persist_state=False,
+                connect_timeout=10,
+                read_timeout=10
+            )
+
+            # 👇 Convert raw waveform to NumPy arrays
             data = scope.get_data()
-            voltage = data['ch1']
-            time_axis = data['time']
+            voltage = np.array(data['ch1'])
+            time_axis = np.array(data['time'])
+
+            # 👇 Filter out any zero-voltage readings
+            valid = voltage != 0
+            voltage = voltage[valid]
+            time_axis = time_axis[valid]
+
             displacement = voltage * scale_factor
             mode = f"Live Mode ({ip})"
-        else:
-            raise RuntimeError("Moku:Go module not available")
 
+        else:
+            raise RuntimeError("Oscilloscope not available")
+
+        # 👇 Plot displacement vs time
         plt.figure(figsize=(8, 4))
         plt.plot(time_axis, displacement, label='Displacement (mm)', color='purple')
         plt.title(f'LVDT Displacement – {mode}')
@@ -37,6 +60,7 @@ def main(ip, is_streamlit=False):
         plt.legend()
         plt.tight_layout()
 
+        # 👇 Display or save plot
         if is_streamlit:
             import streamlit as st
             st.pyplot(plt)

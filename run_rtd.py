@@ -1,7 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
-# Try importing Moku only if available
+# 👇 Tell Moku API where to find instrument files
+os.environ["MOKU_DATA_PATH"] = r"C:\Users\venv\Lib\site-packages\moku\data"
+
+# 👇 Try importing the Oscilloscope class
 try:
     from moku.instruments import Oscilloscope
 except ImportError:
@@ -22,17 +26,31 @@ def main(ip, is_streamlit=False):
         if ip.lower() == "demo" or ip.strip() == "":
             time_axis, temperature = get_mock_data()
             mode = "Demo Mode"
+
         elif Oscilloscope:
-            scope = Oscilloscope(ip)
+            scope = Oscilloscope(
+                ip,
+                force_connect=True,
+                ignore_busy=True,
+                persist_state=False,
+                connect_timeout=10,
+                read_timeout=10
+            )
+
+            # 👇 Acquire data and convert to NumPy arrays for calculation
             data = scope.get_data()
-            voltage = data['ch1']
-            time_axis = data['time']
-            R_sensor = R_fixed * (V_in / voltage - 1)
+            voltage = np.array(data['ch1'])
+            time_axis = np.array(data['time'])
+
+            # 👇 Calculate temperature from voltage
+            R_sensor = R_fixed * ((V_in / voltage) - 1)
             temperature = (R_sensor - R0) / (alpha * R0)
             mode = f"Live Mode ({ip})"
-        else:
-            raise RuntimeError("Moku:Go module not available")
 
+        else:
+            raise RuntimeError("Oscilloscope not available")
+
+        # 👇 Plotting
         plt.figure(figsize=(8, 4))
         plt.plot(time_axis, temperature, label='Temperature (°C)', color='blue')
         plt.title(f'RTD Temperature Output – {mode}')

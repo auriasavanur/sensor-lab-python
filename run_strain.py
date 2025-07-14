@@ -1,6 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
+# 👇 Set the instrument file path for Moku API
+os.environ["MOKU_DATA_PATH"] = r"C:\Users\venv\Lib\site-packages\moku\data"
+
+# 👇 Import Oscilloscope from Moku API
 try:
     from moku.instruments import Oscilloscope
 except ImportError:
@@ -19,16 +24,35 @@ def main(ip, is_streamlit=False):
         if ip.lower() == "demo" or ip.strip() == "":
             time_axis, strain = get_mock_data()
             mode = "Demo Mode"
+
         elif Oscilloscope:
-            scope = Oscilloscope(ip)
+            scope = Oscilloscope(
+                ip,
+                force_connect=True,
+                ignore_busy=True,
+                persist_state=False,
+                connect_timeout=10,
+                read_timeout=10
+            )
+
+            # 👇 Convert raw data to NumPy arrays
             data = scope.get_data()
-            voltage = data['ch1']
-            time_axis = data['time']
+            voltage = np.array(data['ch1'])
+            time_axis = np.array(data['time'])
+
+            # 👇 Filter out invalid voltage readings (e.g., zero)
+            valid = voltage != 0
+            voltage = voltage[valid]
+            time_axis = time_axis[valid]
+
+            # 👇 Compute strain signal
             strain = voltage / (gauge_factor * V_in)
             mode = f"Live Mode ({ip})"
-        else:
-            raise RuntimeError("Moku:Go module not available")
 
+        else:
+            raise RuntimeError("Oscilloscope not available")
+
+        # 👇 Plotting setup
         plt.figure(figsize=(8, 4))
         plt.plot(time_axis, strain, label='Strain (ε)', color='green')
         plt.title(f'Strain Gauge Output – {mode}')
@@ -38,6 +62,7 @@ def main(ip, is_streamlit=False):
         plt.legend()
         plt.tight_layout()
 
+        # 👇 Output
         if is_streamlit:
             import streamlit as st
             st.pyplot(plt)

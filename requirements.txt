@@ -1,0 +1,7 @@
+
+streamlit
+altair
+matplotlib
+pandas
+numpy
+importlib_metadata

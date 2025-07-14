@@ -1,6 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
+# 👇 Point Moku API to the correct instrument data path
+os.environ["MOKU_DATA_PATH"] = r"C:\Users\venv\Lib\site-packages\moku\data"
+
+# 👇 Import Oscilloscope safely
 try:
     from moku.instruments import Oscilloscope
 except ImportError:
@@ -16,15 +21,33 @@ def main(ip, is_streamlit=False):
         if ip.lower() == "demo" or ip.strip() == "":
             time_axis, pulse = get_mock_data()
             mode = "Demo Mode"
-        elif Oscilloscope:
-            scope = Oscilloscope(ip)
-            data = scope.get_data()
-            pulse = data['ch1']
-            time_axis = data['time']
-            mode = f"Live Mode ({ip})"
-        else:
-            raise RuntimeError("Moku:Go module not available")
 
+        elif Oscilloscope:
+            scope = Oscilloscope(
+                ip,
+                force_connect=True,
+                ignore_busy=True,
+                persist_state=False,
+                connect_timeout=10,
+                read_timeout=10
+            )
+
+            # 👇 Convert voltage and time to NumPy arrays
+            data = scope.get_data()
+            pulse = np.array(data['ch1'])
+            time_axis = np.array(data['time'])
+
+            # 👇 Filter out zero voltages to keep waveform stable
+            valid = pulse != 0
+            pulse = pulse[valid]
+            time_axis = time_axis[valid]
+
+            mode = f"Live Mode ({ip})"
+
+        else:
+            raise RuntimeError("Oscilloscope not available")
+
+        # 👇 Plot pulse waveform
         plt.figure(figsize=(8, 4))
         plt.plot(time_axis, pulse, label='Pulse Signal', color='red')
         plt.title(f'Pulse Sensor Output – {mode}')
